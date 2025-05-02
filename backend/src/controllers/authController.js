@@ -154,3 +154,19 @@ export const logOut = async (req, res) => {
     });
   }
 };
+
+export const checkAuth = (req, res) => {
+  try {
+    if (!req.user) {
+      return res
+        .status(401)
+        .json({ message: 'Unauthorized user', success: false });
+    }
+    res
+      .status(200)
+      .json({ message: 'User is Authorized', data: req.user, success: true });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: 'Internal Server Error', success: false });
+  }
+};
