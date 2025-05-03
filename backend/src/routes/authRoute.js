@@ -5,7 +5,7 @@ import {
   logOut,
   signUp,
 } from '../controllers/authController.js';
-import { protectRoute } from '../middleware/authMiddleware.js';
+import { protectRoute } from '../middlewares/authMiddleware.js';
 const authRouter = express.Router();
 
 authRouter.post('/signup', signUp);
