@@ -118,9 +118,7 @@ export const getProfileInfo = async (req, res) => {
     const userId = req.user._id;
 
     // Find user and select specific fields (excluding password)
-    const user = await User.findById(userId).select(
-      'fullName email profilePic'
-    );
+    const user = await User.findById(userId).select('-password');
 
     if (!user) {
       return res.status(404).json({

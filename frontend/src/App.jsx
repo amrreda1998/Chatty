@@ -5,9 +5,17 @@ import SignUpPage from './Pages/SignUpPage';
 import LoginPage from './Pages/LoginPage';
 import SettingsPage from './Pages/SettingsPage';
 import ProfilePage from './Pages/ProfilePage';
-import { Route, Routes } from 'react-router-dom';
-import useAuthStore from './store/useAuthStore.js';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import { useAuthStore } from './store/useAuthStore.js';
 import { Toaster } from 'react-hot-toast';
+
+function PrivateRoute({ children, authUser }) {
+  return authUser ? children : <Navigate to="/login" replace />;
+}
+
+function PublicRoute({ children, authUser }) {
+  return !authUser ? children : <Navigate to="/" replace />;
+}
 
 function App() {
   const { authUser, checkAuth } = useAuthStore();
@@ -32,19 +40,45 @@ function App() {
     <div>
       <Navbar />
       <Routes>
-        <Route path="/" element={!authUser ? <LoginPage /> : <HomePage />} />
+        <Route
+          path="/"
+          element={
+            <PrivateRoute authUser={authUser}>
+              <HomePage />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/signup"
-          element={authUser ? <HomePage /> : <SignUpPage />}
+          element={
+            <PublicRoute authUser={authUser}>
+              <SignUpPage />
+            </PublicRoute>
+          }
         />
         <Route
           path="/login"
-          element={authUser ? <HomePage /> : <LoginPage />}
+          element={
+            <PublicRoute authUser={authUser}>
+              <LoginPage />
+            </PublicRoute>
+          }
         />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route
+          path="/settings"
+          element={
+            <PrivateRoute authUser={authUser}>
+              <SettingsPage />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/profile"
-          element={!authUser ? <LoginPage /> : <ProfilePage />}
+          element={
+            <PrivateRoute authUser={authUser}>
+              <ProfilePage />
+            </PrivateRoute>
+          }
         />
       </Routes>
       <Toaster

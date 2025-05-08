@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import useAuthStore from '../store/useAuthStore.js';
+import { useAuthStore } from '../store/useAuthStore.js';
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 
@@ -27,11 +27,15 @@ function ProfilePage() {
         const { data } = await axiosInstance.get('/users/profile');
         if (data.success) {
           const userData = data.data;
+          console.log(userData);
           const profileData = {
             fullName: userData.fullName || '',
             email: userData.email || '',
             profilePic: userData.profilePic || '',
+            createdAt: userData.createdAt || 'N/A',
+            updatedAt: userData.updatedAt || 'N/A',
           };
+          console.log(profileData);
           setFormData(profileData);
           setoriginalFormData(profileData); // Store original data
           setPreviewImage(userData.profilePic || '');
@@ -90,7 +94,7 @@ function ProfilePage() {
       }
 
       const { data } = await axiosInstance.put(
-        '/users/profile',
+        '/users/update-profile',
         formDataToSend,
         {
           headers: {
@@ -105,6 +109,8 @@ function ProfilePage() {
           fullName: data.data.fullName,
           email: data.data.email,
           profilePic: data.data.profilePic,
+          createdAt: data.data.createdAt || 'N/A',
+          updatedAt: data.data.updatedAt || 'N/A',
         });
         setPreviewImage(data.data.profilePic);
         toast.success('Profile updated successfully!');
@@ -161,6 +167,17 @@ function ProfilePage() {
               >
                 Edit Profile
               </button>
+              {/* add created at and updated at dates */}
+              <div className="text-xs text-base-content/60 space-y-1">
+                <p className="text-green-400">
+                  Created at :{' '}
+                  {new Date(formData.createdAt).toLocaleDateString()}
+                </p>
+                <p className="text-blue-600">
+                  Updated at :{' '}
+                  {new Date(formData.updatedAt).toLocaleDateString()}
+                </p>
+              </div>
             </div>
           ) : (
             // Edit Mode
