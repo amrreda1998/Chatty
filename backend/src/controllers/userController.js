@@ -111,3 +111,35 @@ export const updateProfile = async (req, res) => {
     });
   }
 };
+
+export const getProfileInfo = async (req, res) => {
+  try {
+    // Get user ID from auth middleware
+    const userId = req.user._id;
+
+    // Find user and select specific fields (excluding password)
+    const user = await User.findById(userId).select(
+      'fullName email profilePic'
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // Return user data
+    return res.status(200).json({
+      success: true,
+      message: 'Profile fetched successfully',
+      data: user,
+    });
+  } catch (error) {
+    console.error('Error in getProfileInfo:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};
