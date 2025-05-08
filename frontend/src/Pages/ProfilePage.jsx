@@ -13,6 +13,11 @@ function ProfilePage() {
     email: '',
     profilePic: '',
   });
+  const [originalFormData, setoriginalFormData] = useState({
+    fullName: '',
+    email: '',
+    profilePic: '',
+  });
   const [previewImage, setPreviewImage] = useState('');
 
   // Fetch user profile data when component mounts
@@ -22,11 +27,13 @@ function ProfilePage() {
         const { data } = await axiosInstance.get('/users/profile');
         if (data.success) {
           const userData = data.data;
-          setFormData({
+          const profileData = {
             fullName: userData.fullName || '',
             email: userData.email || '',
             profilePic: userData.profilePic || '',
-          });
+          };
+          setFormData(profileData);
+          setoriginalFormData(profileData); // Store original data
           setPreviewImage(userData.profilePic || '');
         }
       } catch (error) {
@@ -36,7 +43,6 @@ function ProfilePage() {
         setIsFetching(false);
       }
     };
-
     fetchUserProfile();
   }, []);
 
@@ -46,6 +52,12 @@ function ProfilePage() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleCancelChange = () => {
+    setIsEditing(false);
+    setFormData(originalFormData);
+    setPreviewImage(originalFormData.profilePic);
   };
 
   const handleImageChange = (e) => {
@@ -88,7 +100,7 @@ function ProfilePage() {
       );
 
       if (data.success) {
-        setAuthUser(data.data);//updating the user state in the browser
+        setAuthUser(data.data); //updating the user state in the browser
         setFormData({
           fullName: data.data.fullName,
           email: data.data.email,
@@ -199,7 +211,7 @@ function ProfilePage() {
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => handleCancelChange()}
                   className="btn btn-outline flex-1"
                   disabled={isLoading}
                 >

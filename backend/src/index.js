@@ -15,7 +15,7 @@ const app = express();
 // Allow CORS for your frontend origin
 app.use(
   cors({
-    origin: 'http://localhost:5174',
+    origin: 'http://localhost:5173',
     credentials: true, // allow cookies and credentials
   })
 );
