@@ -4,12 +4,10 @@ import LoginPage from './pages/LoginPage';
 import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
 import Navbar from './components/Navbar';
-
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore.js';
 import { useThemeStore } from './store/useThemeStore.js';
 import { useEffect } from 'react';
-
 import { Loader } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
