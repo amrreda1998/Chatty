@@ -39,7 +39,7 @@ function App() {
     );
   }
   return (
-    <div data-theme={theme}>
+    <div data-theme={theme} className="bg-base-100 min-h-screen py-10" >
       <Navbar />
       <Routes>
         <Route
