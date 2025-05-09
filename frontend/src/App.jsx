@@ -8,6 +8,7 @@ import ProfilePage from './Pages/ProfilePage';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore.js';
 import { Toaster } from 'react-hot-toast';
+import { useThemeStore } from './store/useThemeStore.js';
 
 function PrivateRoute({ children, authUser }) {
   return authUser ? children : <Navigate to="/login" replace />;
@@ -20,6 +21,7 @@ function PublicRoute({ children, authUser }) {
 function App() {
   const { authUser, checkAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
+  const { theme } = useThemeStore();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -37,7 +39,7 @@ function App() {
     );
   }
   return (
-    <div>
+    <div data-theme={theme}>
       <Navbar />
       <Routes>
         <Route
@@ -65,14 +67,6 @@ function App() {
           }
         />
         <Route
-          path="/settings"
-          element={
-            <PrivateRoute authUser={authUser}>
-              <SettingsPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
           path="/profile"
           element={
             <PrivateRoute authUser={authUser}>
@@ -80,6 +74,7 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="/settings" element={<SettingsPage />} />
       </Routes>
       <Toaster
         position="top-center"

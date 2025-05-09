@@ -89,7 +89,7 @@ const SignUpPage = () => {
                   name="fullName"
                   type="text"
                   className="input input-bordered w-full pl-10"
-                  placeholder="John Doe"
+                  placeholder="Amr Reda"
                   value={formData.fullName}
                   onChange={handleChange}
                   autoComplete="name"
