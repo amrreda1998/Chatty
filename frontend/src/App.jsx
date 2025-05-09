@@ -3,7 +3,7 @@ import SignUpPage from './pages/SignUpPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SettingsPage from './pages/SettingsPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
-import TempNavbar from './components/Navbar.jsx';
+import Navbar from './components/Navbar.jsx';
 
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore.js';
@@ -34,7 +34,7 @@ const App = () => {
 
   return (
     <div data-theme={theme}>
-      <TempNavbar />
+      <Navbar />
 
       <Routes>
         <Route
