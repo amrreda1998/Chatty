@@ -28,13 +28,14 @@ app.use(
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/dist')));
-
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend', 'dist', 'index.html'));
-  });
-}
+//testing server
+app.get('/', async (req, res) => {
+  try {
+    res.status(200).send({ data: 'server is working' });
+  } catch (err) {
+    res.status(400).send({ message: 'Error' });
+  }
+});
 
 server.listen(PORT, () => {
   console.log('server is running on PORT:' + PORT);
