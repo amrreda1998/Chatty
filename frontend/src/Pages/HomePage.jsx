@@ -1,39 +1,24 @@
-import React, { useState } from 'react';
-import { useAuthStore } from '../store/useAuthStore.js';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { useChatStore } from "../store/useChatStore";
 
-function HomePage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const logout = useAuthStore((state) => state.logout);
-  const navigate = useNavigate();
+import Sidebar from "../components/Sidebar";
+import NoChatSelected from "../components/NoChatSelected";
+import ChatContainer from "../components/ChatContainer";
 
-  const handleLogout = async () => {
-    setIsLoading(true);
-    try {
-      await logout();
-      toast.success('Logged out successfully');
-      navigate('/login');
-    } catch (error) {
-      toast.error('Logout failed');
-      console.error('Logout error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const HomePage = () => {
+  const { selectedUser } = useChatStore();
 
   return (
-    <div>
-      <h1>Home Page</h1>
-      <button
-        className="btn btn-error ml-4"
-        onClick={handleLogout}
-        disabled={isLoading}
-      >
-        {isLoading ? 'Logging out...' : 'Logout'}
-      </button>
+    <div className="h-screen bg-base-200">
+      <div className="flex items-center justify-center pt-20 px-4">
+        <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-6xl h-[calc(100vh-8rem)]">
+          <div className="flex h-full rounded-lg overflow-hidden">
+            <Sidebar />
+
+            {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
-
+};
 export default HomePage;

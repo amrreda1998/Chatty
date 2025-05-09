@@ -1,257 +1,104 @@
-import React, { useState, useEffect } from 'react';
-import { useAuthStore } from '../store/useAuthStore.js';
-import { axiosInstance } from '../lib/axios';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+import { Camera, Mail, User } from "lucide-react";
 
-function ProfilePage() {
-  const { setAuthUser } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    profilePic: '',
-  });
-  const [originalFormData, setoriginalFormData] = useState({
-    fullName: '',
-    email: '',
-    profilePic: '',
-  });
-  const [previewImage, setPreviewImage] = useState('');
+const ProfilePage = () => {
+  const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
+  const [selectedImg, setSelectedImg] = useState(null);
 
-  // Fetch user profile data when component mounts
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const { data } = await axiosInstance.get('/users/profile');
-        if (data.success) {
-          const userData = data.data;
-          console.log(userData);
-          const profileData = {
-            fullName: userData.fullName || '',
-            email: userData.email || '',
-            profilePic: userData.profilePic || '',
-            createdAt: userData.createdAt || 'N/A',
-            updatedAt: userData.updatedAt || 'N/A',
-          };
-          console.log(profileData);
-          setFormData(profileData);
-          setoriginalFormData(profileData); // Store original data
-          setPreviewImage(userData.profilePic || '');
-        }
-      } catch (error) {
-        toast.error('Failed to fetch profile data');
-        console.error('Profile fetch error:', error);
-      } finally {
-        setIsFetching(false);
-      }
-    };
-    fetchUserProfile();
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleCancelChange = () => {
-    setIsEditing(false);
-    setFormData(originalFormData);
-    setPreviewImage(originalFormData.profilePic);
-  };
-
-  const handleImageChange = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.size > 1024 * 1024 * 2) {
-        // 2MB limit
-        toast.error('Image size should be less than 2MB');
-        return;
-      }
-      setFormData((prev) => ({
-        ...prev,
-        profilePic: file,
-      }));
-      setPreviewImage(URL.createObjectURL(file));
-    }
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.readAsDataURL(file);
+
+    reader.onload = async () => {
+      const base64Image = reader.result;
+      setSelectedImg(base64Image);
+      await updateProfile({ profilePic: base64Image });
+    };
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('fullName', formData.fullName.trim());
-      formDataToSend.append('email', formData.email.trim());
-
-      if (formData.profilePic instanceof File) {
-        formDataToSend.append('image', formData.profilePic);
-      }
-
-      const { data } = await axiosInstance.put(
-        '/users/update-profile',
-        formDataToSend,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-
-      if (data.success) {
-        setAuthUser(data.data); //updating the user state in the browser
-        setFormData({
-          fullName: data.data.fullName,
-          email: data.data.email,
-          profilePic: data.data.profilePic,
-          createdAt: data.data.createdAt || 'N/A',
-          updatedAt: data.data.updatedAt || 'N/A',
-        });
-        setPreviewImage(data.data.profilePic);
-        toast.success('Profile updated successfully!');
-        setIsEditing(false);
-      }
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || 'Failed to update profile';
-      toast.error(errorMessage);
-      console.error('Update failed:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (isFetching) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
-      <div className="max-w-md w-full p-6 space-y-6 bg-base-100 rounded-lg shadow-xl">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Profile</h1>
-        </div>
+    <div className="h-screen pt-20">
+      <div className="max-w-2xl mx-auto p-4 py-8">
+        <div className="bg-base-300 rounded-xl p-6 space-y-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold ">Profile</h1>
+            <p className="mt-2">Your profile information</p>
+          </div>
 
-        <div className="flex flex-col items-center gap-4">
-          <div className="avatar">
-            <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+          {/* avatar upload section */}
+
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
               <img
-                src={
-                  previewImage ||
-                  `https://api.dicebear.com/7.x/initials/svg?seed=${formData.fullName}`
-                }
+                src={selectedImg || authUser.profilePic || "/avatar.png"}
                 alt="Profile"
+                className="size-32 rounded-full object-cover border-4 "
               />
+              <label
+                htmlFor="avatar-upload"
+                className={`
+                  absolute bottom-0 right-0 
+                  bg-base-content hover:scale-105
+                  p-2 rounded-full cursor-pointer 
+                  transition-all duration-200
+                  ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}
+                `}
+              >
+                <Camera className="w-5 h-5 text-base-200" />
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={isUpdatingProfile}
+                />
+              </label>
+            </div>
+            <p className="text-sm text-zinc-400">
+              {isUpdatingProfile ? "Uploading..." : "Click the camera icon to update your photo"}
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-1.5">
+              <div className="text-sm text-zinc-400 flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Full Name
+              </div>
+              <p className="px-4 py-2.5 bg-base-200 rounded-lg border">{authUser?.fullName}</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="text-sm text-zinc-400 flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Email Address
+              </div>
+              <p className="px-4 py-2.5 bg-base-200 rounded-lg border">{authUser?.email}</p>
             </div>
           </div>
 
-          {!isEditing ? (
-            // View Mode
-            <div className="space-y-4 w-full">
-              <div className="text-center">
-                <h2 className="text-xl font-semibold">{formData.fullName}</h2>
-                <p className="text-base-content/60">{formData.email}</p>
+          <div className="mt-6 bg-base-300 rounded-xl p-6">
+            <h2 className="text-lg font-medium  mb-4">Account Information</h2>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center justify-between py-2 border-b border-zinc-700">
+                <span>Member Since</span>
+                <span>{authUser.createdAt?.split("T")[0]}</span>
               </div>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="btn btn-outline w-full"
-              >
-                Edit Profile
-              </button>
-              {/* add created at and updated at dates */}
-              <div className="text-xs text-base-content/60 space-y-1">
-                <p className="text-green-400">
-                  Created at :{' '}
-                  {new Date(formData.createdAt).toLocaleDateString()}
-                </p>
-                <p className="text-blue-600">
-                  Updated at :{' '}
-                  {new Date(formData.updatedAt).toLocaleDateString()}
-                </p>
+              <div className="flex items-center justify-between py-2">
+                <span>Account Status</span>
+                <span className="text-green-500">Active</span>
               </div>
             </div>
-          ) : (
-            // Edit Mode
-            <form onSubmit={handleSubmit} className="space-y-4 w-full">
-              <label className="btn btn-sm btn-outline w-full">
-                Change Photo
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  disabled={isLoading}
-                />
-              </label>
-
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Full Name</span>
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  className="input input-bordered"
-                  disabled={isLoading}
-                  required
-                  minLength={3}
-                  maxLength={50}
-                />
-              </div>
-
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Email</span>
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="input input-bordered"
-                  disabled={isLoading}
-                  required
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleCancelChange()}
-                  className="btn btn-outline flex-1"
-                  disabled={isLoading}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary flex-1"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <span className="loading loading-spinner loading-sm" />
-                  ) : (
-                    'Save'
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
+          </div>
         </div>
       </div>
     </div>
   );
-}
-
+};
 export default ProfilePage;

@@ -1,94 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import Navbar from './Components/Navbar';
-import HomePage from './Pages/HomePage';
-import SignUpPage from './Pages/SignUpPage';
-import LoginPage from './Pages/LoginPage';
-import SettingsPage from './Pages/SettingsPage';
-import ProfilePage from './Pages/ProfilePage';
-import { Route, Routes, Navigate } from 'react-router-dom';
-import { useAuthStore } from './store/useAuthStore.js';
-import { Toaster } from 'react-hot-toast';
-import { useThemeStore } from './store/useThemeStore.js';
+import Navbar from "./components/Navbar";
 
-function PrivateRoute({ children, authUser }) {
-  return authUser ? children : <Navigate to="/login" replace />;
-}
+import HomePage from "./pages/HomePage";
+import SignUpPage from "./pages/SignUpPage";
+import LoginPage from "./pages/LoginPage";
+import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
 
-function PublicRoute({ children, authUser }) {
-  return !authUser ? children : <Navigate to="/" replace />;
-}
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuthStore } from "./store/useAuthStore";
+import { useThemeStore } from "./store/useThemeStore";
+import { useEffect } from "react";
 
-function App() {
-  const { authUser, checkAuth } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(true);
+import { Loader } from "lucide-react";
+import { Toaster } from "react-hot-toast";
+
+const App = () => {
+  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
   const { theme } = useThemeStore();
 
+  console.log({ onlineUsers });
+
   useEffect(() => {
-    const initAuth = async () => {
-      await checkAuth();
-      setIsLoading(false);
-    };
-    initAuth();
+    checkAuth();
   }, [checkAuth]);
 
-  if (isLoading) {
+  console.log({ authUser });
+
+  if (isCheckingAuth && !authUser)
     return (
-      <div className="h-screen flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
       </div>
     );
-  }
+
   return (
-    <div data-theme={theme} className="bg-base-100 min-h-screen py-10" >
+    <div data-theme={theme}>
       <Navbar />
+
       <Routes>
-        <Route
-          path="/"
-          element={
-            <PrivateRoute authUser={authUser}>
-              <HomePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <PublicRoute authUser={authUser}>
-              <SignUpPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <PublicRoute authUser={authUser}>
-              <LoginPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <PrivateRoute authUser={authUser}>
-              <ProfilePage />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
+        <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
       </Routes>
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
-        }}
-      />
+
+      <Toaster />
     </div>
   );
-}
-
+};
 export default App;

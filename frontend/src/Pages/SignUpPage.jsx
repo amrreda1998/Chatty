@@ -1,57 +1,37 @@
-import { useState, useEffect } from 'react';
-import { useAuthStore } from '../store/useAuthStore.js';
-import {
-  Eye,
-  EyeOff,
-  Loader2,
-  Lock,
-  Mail,
-  MessageSquare,
-  User,
-} from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import AuthImagePattern from '../components/AuthImagePattern';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";
+import { Link } from "react-router-dom";
+
+import AuthImagePattern from "../components/AuthImagePattern";
+import toast from "react-hot-toast";
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
+    fullName: "",
+    email: "",
+    password: "",
   });
 
-  const { signup, isSigningUp, authUser } = useAuthStore();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (authUser) {
-      navigate('/');
-    }
-  }, [authUser, navigate]);
+  const { signup, isSigningUp } = useAuthStore();
 
   const validateForm = () => {
-    if (!formData.fullName.trim()) return toast.error('Full name is required');
-    if (!formData.email.trim()) return toast.error('Email is required');
-    if (!/\S+@\S+\.\S+/.test(formData.email))
-      return toast.error('Invalid email format');
-    if (!formData.password) return toast.error('Password is required');
-    if (formData.password.length < 6)
-      return toast.error('Password must be at least 6 characters');
+    if (!formData.fullName.trim()) return toast.error("Full name is required");
+    if (!formData.email.trim()) return toast.error("Email is required");
+    if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Invalid email format");
+    if (!formData.password) return toast.error("Password is required");
+    if (formData.password.length < 6) return toast.error("Password must be at least 6 characters");
+
     return true;
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const isValidData = validateForm();
-    if (isValidData === true) {
-      await signup(formData);
-      // navigation handled by useEffect
-    }
+
+    const success = validateForm();
+
+    if (success === true) signup(formData);
   };
 
   return (
@@ -69,15 +49,13 @@ const SignUpPage = () => {
                 <MessageSquare className="size-6 text-primary" />
               </div>
               <h1 className="text-2xl font-bold mt-2">Create Account</h1>
-              <p className="text-base-content/60">
-                Get started with your free account
-              </p>
+              <p className="text-base-content/60">Get started with your free account</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="form-control">
-              <label className="label" htmlFor="fullName">
+              <label className="label">
                 <span className="label-text font-medium">Full Name</span>
               </label>
               <div className="relative">
@@ -85,21 +63,17 @@ const SignUpPage = () => {
                   <User className="size-5 text-base-content/40" />
                 </div>
                 <input
-                  id="fullName"
-                  name="fullName"
                   type="text"
-                  className="input input-bordered w-full pl-10"
+                  className={`input input-bordered w-full pl-10`}
                   placeholder="Amr Reda"
                   value={formData.fullName}
-                  onChange={handleChange}
-                  autoComplete="name"
-                  required
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 />
               </div>
             </div>
 
             <div className="form-control">
-              <label className="label" htmlFor="email">
+              <label className="label">
                 <span className="label-text font-medium">Email</span>
               </label>
               <div className="relative">
@@ -107,21 +81,17 @@ const SignUpPage = () => {
                   <Mail className="size-5 text-base-content/40" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
                   type="email"
-                  className="input input-bordered w-full pl-10"
+                  className={`input input-bordered w-full pl-10`}
                   placeholder="you@example.com"
                   value={formData.email}
-                  onChange={handleChange}
-                  autoComplete="email"
-                  required
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
             </div>
 
             <div className="form-control">
-              <label className="label" htmlFor="password">
+              <label className="label">
                 <span className="label-text font-medium">Password</span>
               </label>
               <div className="relative">
@@ -129,22 +99,16 @@ const SignUpPage = () => {
                   <Lock className="size-5 text-base-content/40" />
                 </div>
                 <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  className="input input-bordered w-full pl-10"
+                  type={showPassword ? "text" : "password"}
+                  className={`input input-bordered w-full pl-10`}
                   placeholder="••••••••"
                   value={formData.password}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                  required
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
                     <EyeOff className="size-5 text-base-content/40" />
@@ -155,25 +119,21 @@ const SignUpPage = () => {
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-              disabled={isSigningUp}
-            >
+            <button type="submit" className="btn btn-primary w-full" disabled={isSigningUp}>
               {isSigningUp ? (
                 <>
                   <Loader2 className="size-5 animate-spin" />
                   Loading...
                 </>
               ) : (
-                'Create Account'
+                "Create Account"
               )}
             </button>
           </form>
 
           <div className="text-center">
             <p className="text-base-content/60">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <Link to="/login" className="link link-primary">
                 Sign in
               </Link>
@@ -183,6 +143,7 @@ const SignUpPage = () => {
       </div>
 
       {/* right side */}
+
       <AuthImagePattern
         title="Join our community"
         subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
@@ -190,5 +151,4 @@ const SignUpPage = () => {
     </div>
   );
 };
-
 export default SignUpPage;
