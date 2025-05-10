@@ -52,7 +52,11 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const user = await User.findOne({ email }).maxTimeMS(20000); // Add timeout of 20s
 
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
@@ -72,8 +76,21 @@ export const login = async (req, res) => {
       profilePic: user.profilePic,
     });
   } catch (error) {
-    console.log('Error in login controller', error.message);
-    res.status(500).json({ message: error.message });
+    console.error('Error in login controller:', error);
+
+    // Handle specific MongoDB timeout error
+    if (
+      error.name === 'MongooseError' &&
+      error.message.includes('buffering timed out')
+    ) {
+      return res.status(503).json({
+        message: 'Database connection timed out. Please try again.',
+      });
+    }
+
+    res.status(500).json({
+      message: 'Internal server error. Please try again later.',
+    });
   }
 };
 
