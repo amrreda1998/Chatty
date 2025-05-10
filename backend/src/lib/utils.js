@@ -4,13 +4,14 @@ export const generateToken = (userId, res) => {
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: '7d',
   });
+  const domain = new URL(process.env.FRONTEND_URL).hostname;
 
   res.cookie('jwt', token, {
     maxAge: 7 * 24 * 60 * 60 * 1000, // MS
     httpOnly: true, // prevent XSS attacks cross-site scripting attacks
-    sameSite: 'none', // Change this
-    secure: true, // Enable this
-    domain: '.vercel.app', // Add this
+    sameSite: 'none',
+    secure: true,
+    domain: domain.replace('www.', ''),
   });
 
   return token;
