@@ -2,14 +2,30 @@ import mongoose from 'mongoose';
 
 export const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 20000, // Timeout after 20s instead of 10s
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-      family: 4, // Use IPv4, skip trying IPv6
-    });
+    const options = {
+      serverSelectionTimeoutMS: 60000, // Increase timeout to 60 seconds
+      socketTimeoutMS: 45000,
+      family: 4,
+      retryWrites: true,
+      keepAlive: true,
+      maxPoolSize: 50,
+      wtimeoutMS: 2500,
+      connectTimeoutMS: 60000,
+    };
+
+    await mongoose.connect(process.env.MONGODB_URI, options);
     console.log('Connected to MongoDB');
+
+    // Add connection error handlers
+    mongoose.connection.on('error', (err) => {
+      console.error('MongoDB connection error:', err);
+    });
+
+    mongoose.connection.on('disconnected', () => {
+      console.log('MongoDB disconnected. Attempting to reconnect...');
+    });
   } catch (error) {
-    console.error('Error connecting to MongoDB:', error.message);
+    console.error('MongoDB connection failed:', error.message);
     process.exit(1);
   }
 };
