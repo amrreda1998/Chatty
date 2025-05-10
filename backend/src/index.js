@@ -12,6 +12,7 @@ dotenv.config();
 
 const PORT = process.env.PORT;
 
+connectDB();
 app.use(express.json());
 app.use(cookieParser());
 app.use(
@@ -36,5 +37,4 @@ app.get('/', async (req, res) => {
 
 server.listen(PORT, () => {
   console.log('server is running on PORT:' + PORT);
-  connectDB();
 });

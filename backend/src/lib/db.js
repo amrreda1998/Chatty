@@ -7,7 +7,6 @@ export const connectDB = async () => {
       socketTimeoutMS: 45000,
       family: 4,
       retryWrites: true,
-      keepAlive: true,
       maxPoolSize: 50,
       wtimeoutMS: 2500,
       connectTimeoutMS: 60000,
