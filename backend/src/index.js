@@ -14,12 +14,10 @@ const PORT = process.env.PORT;
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: 'https://chatty-one-iota.vercel.app',
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  credentials: true
+}));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
